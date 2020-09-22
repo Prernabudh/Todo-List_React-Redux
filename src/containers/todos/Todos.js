@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./Todos.css";
 import Todo from "../../components/todo/Todo";
+import { connect } from "react-redux";
 
 const Todos = (props) => {
-  const [list, setList] = useState([]);
   const [input, setInput] = useState({
     val: "",
     done: false,
@@ -17,25 +17,14 @@ const Todos = (props) => {
     });
   };
   const todoHandler = () => {
+    console.log(props.list);
     num = 0;
-    setList([...list, input]);
+    props.addTodo(input);
     setInput({
       val: "",
       done: false,
       description: "",
     });
-  };
-
-  const deleteHandler = (value) => {
-    setList(list.filter((item) => item.val !== value));
-  };
-
-  const completeHandler = (val) => {
-    let tempList = [...list];
-    tempList.map((item) => {
-      if (item.val === val) item.done = true;
-    });
-    setList(tempList);
   };
   return (
     <>
@@ -67,14 +56,14 @@ const Todos = (props) => {
       </div>
       <div className="todos-outerdiv">
         <div className="todos-innerdiv">
-          {list.map((item) => {
+          {props.list.map((item) => {
             num = num + 1;
             return (
               <Todo
                 item={item.val}
                 description={item.description}
-                deleteHandler={() => deleteHandler(item.val)}
-                completeHandler={() => completeHandler(item.val)}
+                deleteHandler={() => props.deleteHandler(item.val)}
+                completeHandler={() => props.completeHandler(item.val)}
                 done={item.done}
                 colour={num % 2 === 0 ? "#88c8eb" : "#6291de"}
               ></Todo>
@@ -86,4 +75,18 @@ const Todos = (props) => {
   );
 };
 
-export default Todos;
+const mapStateToProps = (state) => {
+  return {
+    list: state.list,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addTodo: (input) => dispatch({ type: "ADD_TODO", input: input }),
+    deleteHandler: (value) => dispatch({ type: "DELETE_TODO", value: value }),
+    completeHandler: (val) => dispatch({ type: "COMPLETE_TODO", val: val }),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Todos);
